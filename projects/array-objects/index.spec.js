@@ -6,9 +6,7 @@ describe('ДЗ 2 - объекты и массивы', () => {
     it('должна вызывать функцию для каждого элемента массива', () => {
       const array = randomNumberArray();
       const fn = jest.fn();
-
       forEach(array, fn);
-
       for (let i = 0; i < array.length; i++) {
         expect(fn).nthCalledWith(i + 1, array[i], i, array);
       }
