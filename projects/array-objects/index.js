@@ -77,7 +77,7 @@ function createProxy(obj) {
   return new Proxy(obj, {
     set(target, prop, val) {
       const power = 2;
-      if (parseFloat(val)) {
+      if (isFinite(val)) {
         target[prop] = val ** power;
         return true;
       }
