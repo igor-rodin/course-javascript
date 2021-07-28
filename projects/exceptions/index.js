@@ -16,7 +16,26 @@
    isAllTrue([1, 2, 3, 4, 5], n => n < 10) // вернет true
    isAllTrue([100, 2, 3, 4, 5], n => n < 10) // вернет false
  */
-function isAllTrue(array, fn) {}
+function isAllTrue(array, fn) {
+  const emptyArrayMsg = 'empty array';
+  const notFuncMsg = 'fn is not a function';
+
+  if ((Array.isArray(array) && array.length === 0) || !Array.isArray(array)) {
+    throw new Error(emptyArrayMsg);
+  }
+
+  if (typeof fn !== 'function') {
+    throw new TypeError(notFuncMsg);
+  }
+
+  for (const elem of array) {
+    if (!fn(elem)) {
+      return false;
+    }
+  }
+
+  return true;
+}
 
 /*
  Задание 2:
@@ -34,7 +53,26 @@ function isAllTrue(array, fn) {}
    isSomeTrue([1, 2, 30, 4, 5], n => n > 20) // вернет true
    isSomeTrue([1, 2, 3, 4, 5], n => n > 20) // вернет false
  */
-function isSomeTrue(array, fn) {}
+function isSomeTrue(array, fn) {
+  const emptyArrayMsg = 'empty array';
+  const notFuncMsg = 'fn is not a function';
+
+  if ((Array.isArray(array) && array.length === 0) || !Array.isArray(array)) {
+    throw new Error(emptyArrayMsg);
+  }
+
+  if (typeof fn !== 'function') {
+    throw new TypeError(notFuncMsg);
+  }
+
+  for (const elem of array) {
+    if (fn(elem)) {
+      return true;
+    }
+  }
+
+  return false;
+}
 
 /*
  Задание 3:
@@ -47,7 +85,24 @@ function isSomeTrue(array, fn) {}
  3.3: Необходимо выбрасывать исключение в случаях:
    - fn не является функцией (с текстом "fn is not a function")
  */
-function returnBadArguments(fn, ...args) {}
+function returnBadArguments(fn, ...args) {
+  const notFuncMsg = 'fn is not a function';
+  if (typeof fn !== 'function') {
+    throw new TypeError(notFuncMsg);
+  }
+
+  const badArguments = [];
+
+  for (const arg of args) {
+    try {
+      fn(arg);
+    } catch {
+      badArguments.push(arg);
+    }
+  }
+
+  return badArguments;
+}
 
 /*
  Задание 4:
@@ -66,7 +121,35 @@ function returnBadArguments(fn, ...args) {}
    - number не является числом (с текстом "number is not a number")
    - какой-либо из аргументов div является нулем (с текстом "division by 0")
  */
-function calculator(number = 0) {}
+function calculator(number = 0) {
+  const notNumberMsg = 'number is not a number';
+  const divByZeroMsg = 'division by 0';
+
+  if (!Number.isFinite(number)) {
+    throw new TypeError(notNumberMsg);
+  }
+
+  return {
+    sum: (...args) => {
+      return args.reduce((acc, elem) => acc + elem, number);
+    },
+
+    dif: (...args) => {
+      return args.reduce((acc, elem) => acc - elem, number);
+    },
+
+    div: (...args) => {
+      if (args.indexOf(0) > -1) {
+        throw new RangeError(divByZeroMsg);
+      }
+      return args.reduce((acc, elem) => acc / elem, number);
+    },
+
+    mul: (...args) => {
+      return args.reduce((acc, elem) => acc * elem, number);
+    },
+  };
+}
 
 /* При решении задач, постарайтесь использовать отладчик */
 
