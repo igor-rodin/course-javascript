@@ -42,9 +42,10 @@ function map(array, fn) {
    reduce([1, 2, 3], (all, current) => all + current) // 6
  */
 function reduce(array, fn, initial) {
-  let prev = initial ? fn(initial, array[0], 0, array) : array[0];
+  let prev = initial ?? array[0];
+  const start = initial ? 0 : 1;
 
-  for (let i = 1; i < array.length; i++) {
+  for (let i = start; i < array.length; i++) {
     prev = fn(prev, array[i], i, array);
   }
   return prev;
