@@ -125,18 +125,14 @@ function calculator(number = 0) {
   const notNumberMsg = 'number is not a number';
   const divByZeroMsg = 'division by 0';
 
-  if (!Number.isFinite(number)) {
+  if (!isFinite(number)) {
     throw new TypeError(notNumberMsg);
   }
 
   return {
-    sum: (...args) => {
-      return args.reduce((acc, elem) => acc + elem, number);
-    },
+    sum: (...args) => args.reduce((acc, elem) => acc + elem, number),
 
-    dif: (...args) => {
-      return args.reduce((acc, elem) => acc - elem, number);
-    },
+    dif: (...args) => args.reduce((acc, elem) => acc - elem, number),
 
     div: (...args) => {
       if (args.indexOf(0) > -1) {
@@ -145,9 +141,7 @@ function calculator(number = 0) {
       return args.reduce((acc, elem) => acc / elem, number);
     },
 
-    mul: (...args) => {
-      return args.reduce((acc, elem) => acc * elem, number);
-    },
+    mul: (...args) => args.reduce((acc, elem) => acc * elem, number),
   };
 }
 
