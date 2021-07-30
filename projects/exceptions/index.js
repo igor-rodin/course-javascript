@@ -20,7 +20,7 @@ function isAllTrue(array, fn) {
   const emptyArrayMsg = 'empty array';
   const notFuncMsg = 'fn is not a function';
 
-  if ((Array.isArray(array) && array.length === 0) || !Array.isArray(array)) {
+  if (!Array.isArray(array) || array.length === 0) {
     throw new Error(emptyArrayMsg);
   }
 
@@ -57,7 +57,7 @@ function isSomeTrue(array, fn) {
   const emptyArrayMsg = 'empty array';
   const notFuncMsg = 'fn is not a function';
 
-  if ((Array.isArray(array) && array.length === 0) || !Array.isArray(array)) {
+  if (!Array.isArray(array) || array.length === 0) {
     throw new Error(emptyArrayMsg);
   }
 
