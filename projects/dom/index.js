@@ -10,7 +10,11 @@
  Пример:
    createDivWithText('loftschool') // создаст элемент div, поместит в него 'loftschool' и вернет созданный элемент
  */
-function createDivWithText(text) {}
+function createDivWithText(text) {
+  const divElem = document.createElement('div');
+  divElem.textContent = text;
+  return divElem;
+}
 
 /*
  Задание 2:
@@ -20,7 +24,9 @@ function createDivWithText(text) {}
  Пример:
    prepend(document.querySelector('#one'), document.querySelector('#two')) // добавит элемент переданный первым аргументом в начало элемента переданного вторым аргументом
  */
-function prepend(what, where) {}
+function prepend(what, where) {
+  where.prepend(what);
+}
 
 /*
  Задание 3:
@@ -41,7 +47,12 @@ function prepend(what, where) {}
 
    findAllPSiblings(document.body) // функция должна вернуть массив с элементами div и span т.к. следующим соседом этих элементов является элемент с тегом P
  */
-function findAllPSiblings(where) {}
+function findAllPSiblings(where) {
+  const siblingTag = 'P';
+  const childs = Array.from(where.children);
+
+  return childs.filter((elem) => elem.nextElementSibling?.tagName === siblingTag);
+}
 
 /*
  Задание 4:
@@ -63,7 +74,7 @@ function findAllPSiblings(where) {}
 function findError(where) {
   const result = [];
 
-  for (const child of where.childNodes) {
+  for (const child of where.children) {
     result.push(child.textContent);
   }
 
@@ -82,12 +93,19 @@ function findError(where) {
    После выполнения функции, дерево <div></div>привет<p></p>loftchool!!!
    должно быть преобразовано в <div></div><p></p>
  */
-function deleteTextNodes(where) {}
+function deleteTextNodes(where) {
+  for (const elem of where.childNodes) {
+    if (elem.nodeType === Node.TEXT_NODE) {
+      elem.remove();
+    }
+  }
+}
 
 /*
  Задание 6:
 
- Выполнить предыдущее задание с использование рекурсии - то есть необходимо заходить внутрь каждого дочернего элемента (углубляться в дерево)
+ Выполнить предыдущее задание с использование рекурсии - то есть необходимо заходить внутрь каждого дочернего
+  элемента (углубляться в дерево)
 
  Будьте внимательны при удалении узлов, т.к. можно получить неожиданное поведение при переборе узлов
 
@@ -95,7 +113,18 @@ function deleteTextNodes(where) {}
    После выполнения функции, дерево <span> <div> <b>привет</b> </div> <p>loftchool</p> !!!</span>
    должно быть преобразовано в <span><div><b></b></div><p></p></span>
  */
-function deleteTextNodesRecursive(where) {}
+function deleteTextNodesRecursive(where) {
+  const childs = where.childNodes;
+  for (let i = 0; i < childs.length; i++) {
+    const elem = childs[i];
+    if (elem.nodeType === Node.ELEMENT_NODE) {
+      deleteTextNodesRecursive(elem);
+    } else if (elem.nodeType === Node.TEXT_NODE) {
+      elem.remove();
+      i--;
+    }
+  }
+}
 
 /*
  Задание 7 *:
@@ -117,7 +146,65 @@ function deleteTextNodesRecursive(where) {}
      texts: 3
    }
  */
-function collectDOMStat(root) {}
+function collectDOMStat(root) {
+  const addStat = (prev, next) => {
+    prev.texts += next.texts;
+
+    for (const tag in next.tags) {
+      if (tag in prev.tags) {
+        prev.tags[tag] += 1;
+      } else {
+        prev.tags[tag] = 1;
+      }
+    }
+
+    for (const clas in next.classes) {
+      if (clas in prev.classes) {
+        prev.classes[clas] += 1;
+      } else {
+        prev.classes[clas] = 1;
+      }
+    }
+  };
+
+  const getStatForElem = (elem) => {
+    const stat = {
+      tags: {},
+      classes: {},
+      texts: 0,
+    };
+    if (elem.nodeType === Node.TEXT_NODE) {
+      stat.texts += 1;
+    }
+
+    if (elem.nodeType === Node.ELEMENT_NODE) {
+      const cls = elem.classList;
+      cls.forEach((clas) => {
+        stat.classes[clas] = stat.classes[clas] ? stat.classes[clas]++ : 1;
+      });
+
+      const tag = elem.nodeName;
+      stat.tags[tag] = 1;
+    }
+    return stat;
+  };
+
+  const total = {
+    tags: {},
+    classes: {},
+    texts: 0,
+  };
+  const childs = Array.from(root.childNodes);
+  childs.forEach((elem) => {
+    addStat(total, getStatForElem(elem));
+    if (elem.nodeType === Node.ELEMENT_NODE) {
+      const innerStat = collectDOMStat(elem);
+      addStat(total, innerStat);
+    }
+  });
+
+  return total;
+}
 
 /*
  Задание 8 *:
@@ -151,7 +238,34 @@ function collectDOMStat(root) {}
      nodes: [div]
    }
  */
-function observeChildNodes(where, fn) {}
+function observeChildNodes(where, fn) {
+  const config = {
+    childList: true,
+  };
+
+  const callback = function (mutationList, observe) {
+    mutationList.forEach((mutation) => {
+      let param;
+      if (mutation.type === 'childList') {
+        if (mutation.addedNodes.length) {
+          param = {
+            type: 'insert',
+            nodes: Array.from(mutation.addedNodes),
+          };
+        } else if (mutation.removedNodes.length) {
+          param = {
+            type: 'remove',
+            nodes: Array.from(mutation.removedNodes),
+          };
+        }
+      }
+      fn.call(this, param);
+    });
+  };
+
+  const observer = new MutationObserver(callback);
+  observer.observe(where, config);
+}
 
 export {
   createDivWithText,
