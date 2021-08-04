@@ -147,12 +147,18 @@ function deleteTextNodesRecursive(where) {
    }
  */
 function collectDOMStat(root) {
-  const addStat = (prev, next) => {
+  const total = {
+    tags: {},
+    classes: {},
+    texts: 0,
+  };
+
+  const collectStat = (prev, next) => {
     prev.texts += next.texts;
 
     for (const tag in next.tags) {
       if (tag in prev.tags) {
-        prev.tags[tag] += 1;
+        prev.tags[tag]++;
       } else {
         prev.tags[tag] = 1;
       }
@@ -160,7 +166,7 @@ function collectDOMStat(root) {
 
     for (const clas in next.classes) {
       if (clas in prev.classes) {
-        prev.classes[clas] += 1;
+        prev.classes[clas]++;
       } else {
         prev.classes[clas] = 1;
       }
@@ -174,10 +180,8 @@ function collectDOMStat(root) {
       texts: 0,
     };
     if (elem.nodeType === Node.TEXT_NODE) {
-      stat.texts += 1;
-    }
-
-    if (elem.nodeType === Node.ELEMENT_NODE) {
+      stat.texts = 1;
+    } else if (elem.nodeType === Node.ELEMENT_NODE) {
       const cls = elem.classList;
       cls.forEach((clas) => {
         stat.classes[clas] = stat.classes[clas] ? stat.classes[clas]++ : 1;
@@ -189,19 +193,17 @@ function collectDOMStat(root) {
     return stat;
   };
 
-  const total = {
-    tags: {},
-    classes: {},
-    texts: 0,
-  };
-  const childs = Array.from(root.childNodes);
-  childs.forEach((elem) => {
-    addStat(total, getStatForElem(elem));
-    if (elem.nodeType === Node.ELEMENT_NODE) {
-      const innerStat = collectDOMStat(elem);
-      addStat(total, innerStat);
+  function walkNode(node, cb) {
+    collectStat(total, cb(node));
+    const childs = node.childNodes;
+    for (const child of childs) {
+      walkNode(child, cb);
     }
-  });
+  }
+
+  for (const node of root.childNodes) {
+    walkNode(node, (elem) => getStatForElem(elem));
+  }
 
   return total;
 }
