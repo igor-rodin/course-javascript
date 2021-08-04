@@ -88,13 +88,46 @@ const filterInput = homeworkContainer.querySelector('#filter-input');
 /* Блок с результатами поиска */
 const filterResult = homeworkContainer.querySelector('#filter-result');
 
-loadingBlock.addEventListener();
-loadingFailedBlock.addEventListener();
-filterBlock.addEventListener();
-filterResult.addEventListener();
+retryButton.addEventListener('click', () => {
+  loadingBlock.style.display = 'block';
+  getTownData();
+});
 
-retryButton.addEventListener('click', () => {});
+filterInput.addEventListener('input', function (evt) {
+  console.log(evt.target.value);
+  const sugest = evt.target.value;
+  filterResult.innerHTML = '';
+  if (sugest.trim() === '') {
+    searched = [];
+  } else {
+    searched = towns.filter((elem) => isMatching(elem.name, sugest));
+    if (searched) {
+      searched.forEach((elem) => {
+        const townElem = document.createElement('div');
+        townElem.textContent = elem.name;
+        filterResult.append(townElem);
+      });
+    }
+  }
+});
 
-filterInput.addEventListener('input', function () {});
+let towns = [];
+let searched = [];
+
+function getTownData() {
+  loadTowns()
+    .then((result) => (towns = [...result]))
+    .then(() => {
+      filterBlock.style.display = 'block';
+    })
+    .finally(() => {
+      loadingBlock.style.display = 'hidden';
+    })
+    .catch((error) => {
+      loadingFailedBlock.style.display = 'block';
+    });
+}
+
+getTownData();
 
 export { loadTowns, isMatching };
