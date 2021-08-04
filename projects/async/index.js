@@ -39,7 +39,26 @@ const homeworkContainer = document.querySelector('#app');
  Массив городов пожно получить отправив асинхронный запрос по адресу
  https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json
  */
-function loadTowns() {}
+function loadTowns() {
+  const townLink = `https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json`;
+  return new Promise((resolve, reject) => {
+    let towns;
+    const xhr = new XMLHttpRequest();
+
+    xhr.open('GET', townLink, true);
+    xhr.setRequestHeader('content-type', 'application/json');
+    xhr.send();
+    xhr.addEventListener('load', () => {
+      if (xhr.status >= 400) {
+        reject(xhr.responseText);
+      } else {
+        towns = JSON.parse(xhr.responseText);
+        towns.sort((first, second) => (first.name <= second.name ? -1 : 1));
+        resolve(towns);
+      }
+    });
+  });
+}
 
 /*
  Функция должна проверять встречается ли подстрока chunk в строке full
@@ -52,7 +71,9 @@ function loadTowns() {}
    isMatching('Moscow', 'SCO') // true
    isMatching('Moscow', 'Moscov') // false
  */
-function isMatching(full, chunk) {}
+function isMatching(full, chunk) {
+  return full.toLowerCase().includes(chunk.toLowerCase());
+}
 
 /* Блок с надписью "Загрузка" */
 const loadingBlock = homeworkContainer.querySelector('#loading-block');
@@ -66,6 +87,11 @@ const filterBlock = homeworkContainer.querySelector('#filter-block');
 const filterInput = homeworkContainer.querySelector('#filter-input');
 /* Блок с результатами поиска */
 const filterResult = homeworkContainer.querySelector('#filter-result');
+
+loadingBlock.addEventListener();
+loadingFailedBlock.addEventListener();
+filterBlock.addEventListener();
+filterResult.addEventListener();
 
 retryButton.addEventListener('click', () => {});
 
