@@ -37,22 +37,23 @@ const homeworkContainer = document.querySelector('#app');
  Функция должна вернуть Promise, который должен быть разрешен с массивом городов в качестве значения
 
  Массив городов пожно получить отправив асинхронный запрос по адресу
- https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json
+ http://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json
  */
 function loadTowns() {
-  const townLink = `https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json`;
+  const townLink =
+    'https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json';
   return new Promise((resolve, reject) => {
-    let towns;
     const xhr = new XMLHttpRequest();
 
     xhr.open('GET', townLink, true);
-    xhr.setRequestHeader('content-type', 'application/json');
+    // xhr.setRequestHeader('content-type', 'application/json');
+    xhr.setRequestHeader('content-type', 'text/plain');
     xhr.send();
     xhr.addEventListener('load', () => {
       if (xhr.status >= 400) {
         reject(xhr.responseText);
       } else {
-        towns = JSON.parse(xhr.responseText);
+        const towns = JSON.parse(xhr.responseText);
         towns.sort((first, second) => (first.name <= second.name ? -1 : 1));
         resolve(towns);
       }
@@ -121,7 +122,7 @@ function getTownData() {
       filterBlock.style.display = 'block';
     })
     .finally(() => {
-      loadingBlock.style.display = 'hidden';
+      loadingBlock.style.display = 'none';
     })
     .catch((error) => {
       loadingFailedBlock.style.display = 'block';
