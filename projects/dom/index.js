@@ -49,9 +49,8 @@ function prepend(what, where) {
  */
 function findAllPSiblings(where) {
   const siblingTag = 'P';
-  const childs = Array.from(where.children);
-
-  return childs.filter((elem) => elem.nextElementSibling?.tagName === siblingTag);
+  const tagElems = Array.from(where.querySelectorAll(siblingTag));
+  return tagElems.map((elem) => elem.previousSibling);
 }
 
 /*
@@ -114,16 +113,14 @@ function deleteTextNodes(where) {
    должно быть преобразовано в <span><div><b></b></div><p></p></span>
  */
 function deleteTextNodesRecursive(where) {
-  const childs = where.childNodes;
-  for (let i = 0; i < childs.length; i++) {
-    const elem = childs[i];
+  const childs = [...where.childNodes];
+  childs.forEach((elem) => {
     if (elem.nodeType === Node.ELEMENT_NODE) {
       deleteTextNodesRecursive(elem);
     } else if (elem.nodeType === Node.TEXT_NODE) {
-      elem.remove();
-      i--;
+      where.removeChild(elem);
     }
-  }
+  });
 }
 
 /*
@@ -153,57 +150,21 @@ function collectDOMStat(root) {
     texts: 0,
   };
 
-  const collectStat = (prev, next) => {
-    prev.texts += next.texts;
+  (function getStat(node) {
+    for (const elem of node.childNodes) {
+      if (elem.nodeType === Node.TEXT_NODE) {
+        total.texts++;
+      } else if (elem.nodeType === Node.ELEMENT_NODE) {
+        elem.classList.forEach((clas) => {
+          total.classes[clas] = clas in total.classes ? total.classes[clas] + 1 : 1;
+        });
 
-    for (const tag in next.tags) {
-      if (tag in prev.tags) {
-        prev.tags[tag]++;
-      } else {
-        prev.tags[tag] = 1;
+        const tag = elem.nodeName;
+        total.tags[tag] = tag in total.tags ? total.tags[tag] + 1 : 1;
+        getStat(elem);
       }
     }
-
-    for (const clas in next.classes) {
-      if (clas in prev.classes) {
-        prev.classes[clas]++;
-      } else {
-        prev.classes[clas] = 1;
-      }
-    }
-  };
-
-  const getStatForElem = (elem) => {
-    const stat = {
-      tags: {},
-      classes: {},
-      texts: 0,
-    };
-    if (elem.nodeType === Node.TEXT_NODE) {
-      stat.texts = 1;
-    } else if (elem.nodeType === Node.ELEMENT_NODE) {
-      const cls = elem.classList;
-      cls.forEach((clas) => {
-        stat.classes[clas] = stat.classes[clas] ? stat.classes[clas]++ : 1;
-      });
-
-      const tag = elem.nodeName;
-      stat.tags[tag] = 1;
-    }
-    return stat;
-  };
-
-  function walkNode(node, cb) {
-    collectStat(total, cb(node));
-    const childs = node.childNodes;
-    for (const child of childs) {
-      walkNode(child, cb);
-    }
-  }
-
-  for (const node of root.childNodes) {
-    walkNode(node, (elem) => getStatForElem(elem));
-  }
+  })(root);
 
   return total;
 }
@@ -248,18 +209,16 @@ function observeChildNodes(where, fn) {
   const callback = function (mutationList, observe) {
     mutationList.forEach((mutation) => {
       let param;
-      if (mutation.type === 'childList') {
-        if (mutation.addedNodes.length) {
-          param = {
-            type: 'insert',
-            nodes: Array.from(mutation.addedNodes),
-          };
-        } else if (mutation.removedNodes.length) {
-          param = {
-            type: 'remove',
-            nodes: Array.from(mutation.removedNodes),
-          };
-        }
+      if (mutation.addedNodes.length) {
+        param = {
+          type: 'insert',
+          nodes: Array.from(mutation.addedNodes),
+        };
+      } else if (mutation.removedNodes.length) {
+        param = {
+          type: 'remove',
+          nodes: Array.from(mutation.removedNodes),
+        };
       }
       fn.call(this, param);
     });
