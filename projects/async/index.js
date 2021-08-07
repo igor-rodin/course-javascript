@@ -42,23 +42,16 @@ const homeworkContainer = document.querySelector('#app');
 function loadTowns() {
   const townLink =
     'https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json';
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
 
-    xhr.open('GET', townLink, true);
-    // xhr.setRequestHeader('content-type', 'application/json');
-    xhr.setRequestHeader('content-type', 'text/plain');
-    xhr.send();
-    xhr.addEventListener('load', () => {
-      if (xhr.status >= 400) {
-        reject(xhr.responseText);
+  return fetch(townLink)
+    .then((response) => {
+      if (response.ok) {
+        return response.json();
       } else {
-        const towns = JSON.parse(xhr.responseText);
-        towns.sort((first, second) => (first.name <= second.name ? -1 : 1));
-        resolve(towns);
+        throw new Error('Не удалось загрузить города');
       }
-    });
-  });
+    })
+    .then((towns) => towns.sort((first, second) => (first.name <= second.name ? -1 : 1)));
 }
 
 /*
@@ -95,7 +88,6 @@ retryButton.addEventListener('click', () => {
 });
 
 filterInput.addEventListener('input', function (evt) {
-  console.log(evt.target.value);
   const sugest = evt.target.value;
   filterResult.innerHTML = '';
   if (sugest.trim() === '') {

@@ -29,18 +29,10 @@ function delayPromise(seconds) {
  */
 function loadAndSortTowns() {
   const townLink = `https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json`;
-  return new Promise((resolve) => {
-    const xhr = new XMLHttpRequest();
 
-    xhr.open('GET', townLink, true);
-    xhr.setRequestHeader('content-type', 'application/json');
-    xhr.send();
-    xhr.addEventListener('load', () => {
-      const towns = JSON.parse(xhr.responseText);
-      towns.sort((first, second) => (first.name <= second.name ? -1 : 1));
-      resolve(towns);
-    });
-  });
+  return fetch(townLink)
+    .then((response) => response.json())
+    .then((towns) => towns.sort((first, second) => (first.name <= second.name ? -1 : 1)));
 }
 
 export { delayPromise, loadAndSortTowns };
