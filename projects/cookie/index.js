@@ -45,8 +45,93 @@ const addButton = homeworkContainer.querySelector('#add-button');
 // таблица со списком cookie
 const listTable = homeworkContainer.querySelector('#list-table tbody');
 
-filterNameInput.addEventListener('input', function () {});
+let cookies = getBrowserCookies();
+let filteredCookies = [];
 
-addButton.addEventListener('click', () => {});
+renderCookieTable(cookies);
+
+function getBrowserCookies() {
+  if (document.cookie.length) {
+    return document.cookie.split('; ').map((val) => {
+      const [name, value] = val.split('=');
+      return { name, value };
+    });
+  }
+}
+
+function refreshCookieTable() {
+  cookies = getBrowserCookies();
+  const filterStr = filterNameInput.value.trim().toLowerCase();
+  if (filterStr) {
+    filteredCookies = cookies.filter(
+      (cookie) =>
+        cookie.name.toLowerCase().includes(filterStr) ||
+        cookie.value.toLowerCase().includes(filterStr)
+    );
+    renderCookieTable(filteredCookies);
+  } else {
+    renderCookieTable(cookies);
+  }
+}
+
+function createTableRaw(cookie) {
+  const rawElem = document.createElement('tr');
+  const nameElem = document.createElement('th');
+  nameElem.textContent = cookie.name;
+  const valElem = document.createElement('th');
+  valElem.textContent = cookie.value;
+  const delBtnElem = document.createElement('th');
+  const delBtn = document.createElement('button');
+  delBtn.textContent = '\u274C';
+  delBtn.addEventListener('click', (evt) => {
+    deleteCookie(cookie.name);
+    refreshCookieTable();
+  });
+  delBtnElem.append(delBtn);
+
+  rawElem.append(nameElem);
+  rawElem.append(valElem);
+  rawElem.append(delBtnElem);
+
+  return rawElem;
+}
+
+function renderCookieTable(cookies) {
+  listTable.innerHTML = '';
+  if (!cookies) {
+    return;
+  }
+  const fragment = document.createDocumentFragment();
+
+  cookies.forEach((val) => {
+    const raw = createTableRaw(val);
+    fragment.append(raw);
+  });
+
+  listTable.append(fragment);
+}
+
+function createCookie(name, value) {
+  document.cookie = `${name}=${value}`;
+}
+
+function deleteCookie(name) {
+  document.cookie = `${name}=; expires='${new Date().toUTCString()}'`;
+}
+
+filterNameInput.addEventListener('input', function (event) {
+  refreshCookieTable();
+});
+
+addButton.addEventListener('click', () => {
+  const cookieName = addNameInput.value.trim();
+  const cookieValue = addValueInput.value.trim();
+  if (cookieName && cookieValue) {
+    createCookie(cookieName, cookieValue);
+    refreshCookieTable();
+    addNameInput.value = '';
+    addValueInput.value = '';
+  }
+});
 
 listTable.addEventListener('click', (e) => {});
