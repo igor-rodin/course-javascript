@@ -82,11 +82,8 @@ function createTableRaw(cookie) {
   valElem.textContent = cookie.value;
   const delBtnElem = document.createElement('th');
   const delBtn = document.createElement('button');
+  delBtn.setAttribute('data-remove-qookie', cookie.name);
   delBtn.textContent = '\u274C';
-  delBtn.addEventListener('click', (evt) => {
-    deleteCookie(cookie.name);
-    refreshCookieTable();
-  });
   delBtnElem.append(delBtn);
 
   rawElem.append(nameElem);
@@ -116,7 +113,7 @@ function createCookie(name, value) {
 }
 
 function deleteCookie(name) {
-  document.cookie = `${name}=; expires='${new Date().toUTCString()}'`;
+  document.cookie = `${name}=; expires='${new Date(0).toUTCString()}'`;
 }
 
 filterNameInput.addEventListener('input', function (event) {
@@ -129,9 +126,12 @@ addButton.addEventListener('click', () => {
   if (cookieName && cookieValue) {
     createCookie(cookieName, cookieValue);
     refreshCookieTable();
-    addNameInput.value = '';
-    addValueInput.value = '';
   }
 });
 
-listTable.addEventListener('click', (e) => {});
+listTable.addEventListener('click', (event) => {
+  if (event.target.dataset.removeQookie) {
+    deleteCookie(event.target.dataset.removeQookie);
+    refreshCookieTable();
+  }
+});
